@@ -4,6 +4,7 @@
 #include"MCEngine1D.hpp"
 #include<cstdlib>
 #include<ctime>
+#include<cassert>
 using namespace SiriusFm;
 using namespace std;
 int main(int argc, char* argv[]){
@@ -16,19 +17,20 @@ int main(int argc, char* argv[]){
 	double mu = atof(argv[1]);
 	double sigma =	atof(argv[2]);
 	double S0 =	atof(argv[3]);
-	long T_days =	atof(argv[4]);
+	long T_days = atof(argv[4]);
 	int tau_min = atof(argv[5]);
-	long P =	atof(argv[6]);
+	long P = atof(argv[6]);
 	CcyE ccyA = CcyE::USD;
 	IRProvider<IRModeE::Const> irp(nullptr);
 	DiffusionGBM diff(mu, sigma);
+
 	MCEngine1D<decltype(diff), decltype(irp), decltype(irp), decltype(ccyA), decltype(ccyA)>
-	//ccye
-	mce(20.000, 20.000);
+
+	mce(20000, 20000);
 	//mce.Simulate(time());
 	time_t t0 = time(nullptr);
 	time_t T = t0+T_days*86400;
-	double Ty = double(T_days)/365.25;
+	double Ty = double(T_days)/(365.25);
 	//run MC
 	mce.Simulate<false>(t0, T, tau_min, P, S0, &diff, &irp, &irp, ccyA, ccyA);
 
@@ -50,7 +52,7 @@ int main(int argc, char* argv[]){
 		double RT = log(ST/S0);
 		EST+=RT; EST2 += RT*RT;
 	} //END
-	assert(NVP<0);
+	assert(NVP>1);
 	EST/=double(NVP); //mu-sigma^2/2
 	double VarST = (EST2 - double(NVP)*EST*EST)/double(NVP-1); //sigma^2*T
 	double sigma2E = VarST/Ty;
@@ -59,6 +61,6 @@ int main(int argc, char* argv[]){
 	cout << "sigma2E=" << sigma*sigma << "sigma2E=" << sigma2E <<endl;
 	return 0;
 
-
-
 }
+
+
